@@ -13,12 +13,17 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// GET - List all bookmarks
 app.get("/bookmarks", (req, res) => {
+  const { tag } = req.query;
+  if (tag) {
+    const filtered = bookmarks.filter((b) =>
+      b.tags?.some((t) => t.toLowerCase() === (tag as string).toLowerCase()),
+    );
+    return res.json(filtered);
+  }
   res.json(bookmarks);
 });
 
-// GET - Find a specific bookmark by ID
 app.get("/bookmarks/:id", (req, res) => {
   const bookmark = bookmarks.find((b) => b.id === req.params.id);
   if (!bookmark) {
@@ -27,22 +32,15 @@ app.get("/bookmarks/:id", (req, res) => {
   res.json(bookmark);
 });
 
-// POST - Create a bookmark (Now with persistence)
 app.post("/bookmarks", async (req, res) => {
   const result = BookmarkSchema.safeParse(req.body);
-
   if (!result.success) {
     return res.status(400).json({ errors: result.error.errors });
   }
 
-  const newBookmark: Bookmark = {
-    ...result.data,
-    id: uuidv4(),
-  };
-
+  const newBookmark: Bookmark = { ...result.data, id: uuidv4() };
   bookmarks.push(newBookmark);
   await saveBookmarks(bookmarks);
-
   res.status(201).json(newBookmark);
 });
 

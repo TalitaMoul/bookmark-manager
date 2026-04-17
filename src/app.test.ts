@@ -43,5 +43,26 @@ describe("Bookmarks API", () => {
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty("error", "Bookmark not found");
     });
+
+    describe("Filtering Operations", () => {
+      it("should filter bookmarks by tag", async () => {
+        // Create a bookmark with specific tags for testing
+        await request(app)
+          .post("/bookmarks")
+          .send({
+            title: "Ghost Official Site",
+            url: "https://www.ghost-official.com",
+            tags: ["music", "rock"],
+          });
+
+        // Request bookmarks filtered by the 'music' tag
+        const res = await request(app).get("/bookmarks?tag=music");
+
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBeGreaterThan(0);
+        // Ensure the returned bookmark actually contains the requested tag
+        expect(res.body[0].tags).toContain("music");
+      });
+    });
   });
 });
