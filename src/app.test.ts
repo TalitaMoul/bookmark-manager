@@ -64,5 +64,35 @@ describe("Bookmarks API", () => {
         expect(res.body[0].tags).toContain("music");
       });
     });
+
+    describe("Update and Delete Operations", () => {
+      let testId: string;
+
+      beforeAll(async () => {
+        // Create a temporary bookmark to test updates/deletes
+        const res = await request(app)
+          .post("/bookmarks")
+          .send({ title: "Test", url: "https://test.com" });
+        testId = res.body.id;
+      });
+
+      it("should update an existing bookmark", async () => {
+        const res = await request(app)
+          .put(`/bookmarks/${testId}`)
+          .send({ title: "Updated Title", url: "https://test.com" });
+
+        expect(res.status).toBe(200);
+        expect(res.body.title).toBe("Updated Title");
+      });
+
+      it("should delete a bookmark", async () => {
+        const res = await request(app).delete(`/bookmarks/${testId}`);
+        expect(res.status).toBe(204);
+
+        // Verify it's really gone
+        const check = await request(app).get(`/bookmarks/${testId}`);
+        expect(check.status).toBe(404);
+      });
+    });
   });
 });

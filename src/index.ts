@@ -44,6 +44,44 @@ app.post("/bookmarks", async (req, res) => {
   res.status(201).json(newBookmark);
 });
 
+// PUT - Update an existing bookmark by ID
+app.put("/bookmarks/:id", async (req, res) => {
+  const { id } = req.params;
+  const index = bookmarks.findIndex((b) => b.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: "Bookmark not found" });
+  }
+
+  // Validate the update data using the same schema
+  const result = BookmarkSchema.safeParse(req.body);
+  if (!result.success) {
+    return res.status(400).json({ errors: result.error.errors });
+  }
+
+  // Keep the original ID, update the rest
+  bookmarks[index] = { ...result.data, id };
+  await saveBookmarks(bookmarks);
+
+  res.json(bookmarks[index]);
+});
+
+// DELETE - Remove a bookmark by ID
+app.delete("/bookmarks/:id", async (req, res) => {
+  const { id } = req.params;
+  const initialLength = bookmarks.length;
+
+  // Filter out the bookmark with the given ID
+  bookmarks = bookmarks.filter((b) => b.id !== id);
+
+  if (bookmarks.length === initialLength) {
+    return res.status(404).json({ error: "Bookmark not found" });
+  }
+
+  await saveBookmarks(bookmarks);
+  res.status(204).send(); // 204 No Content is standard for successful deletion
+});
+
 if (process.env.NODE_ENV !== "test") {
   app.listen(config.PORT, () => {
     console.log(`🚀 Server ready at http://localhost:${config.PORT}`);
