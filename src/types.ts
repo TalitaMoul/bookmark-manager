@@ -1,9 +1,9 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const BookmarkSchema = z.object({
   id: z.string().uuid().optional(),
-  title: z.string().min(1, "O título é obrigatório"),
-  url: z.string().url("A URL deve ser válida"),
+  title: z.string().min(1, "Title is required"),
+  url: z.string().url("Must be a valid URL"),
   description: z.string().optional(),
 });
 
