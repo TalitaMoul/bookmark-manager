@@ -25,4 +25,9 @@ describe("Health Check", () => {
 
     expect(res.status).toBe(400);
   });
+
+  it("should return 404 for non-existent bookmark", async () => {
+    const res = await request(app).get("/bookmarks/999-invalid-id");
+    expect(res.status).toBe(404);
+  });
 });
