@@ -1,3 +1,5 @@
+process.env.BOOKMARKS_FILE = "./bookmarks.test.json";
+
 module.exports = {
   preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",

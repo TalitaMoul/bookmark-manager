@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.env
+bookmarks.json
+bookmarks.test.json

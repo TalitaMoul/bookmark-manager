@@ -38,6 +38,15 @@ describe("Bookmarks API", () => {
       expect(Array.isArray(res.body)).toBe(true);
     });
 
+    it("should return a bookmark by id", async () => {
+      const created = await request(app)
+        .post("/bookmarks")
+        .send({ title: "Find Me", url: "https://findme.com" });
+      const res = await request(app).get(`/bookmarks/${created.body.id}`);
+      expect(res.status).toBe(200);
+      expect(res.body.id).toBe(created.body.id);
+    });
+
     it("should return 404 for non-existent bookmark id", async () => {
       const res = await request(app).get("/bookmarks/999-invalid-id");
       expect(res.status).toBe(404);
@@ -46,7 +55,6 @@ describe("Bookmarks API", () => {
 
     describe("Filtering Operations", () => {
       it("should filter bookmarks by tag", async () => {
-        // Create a bookmark with specific tags for testing
         await request(app)
           .post("/bookmarks")
           .send({
@@ -55,12 +63,10 @@ describe("Bookmarks API", () => {
             tags: ["music", "rock"],
           });
 
-        // Request bookmarks filtered by the 'music' tag
         const res = await request(app).get("/bookmarks?tag=music");
 
         expect(res.status).toBe(200);
         expect(res.body.length).toBeGreaterThan(0);
-        // Ensure the returned bookmark actually contains the requested tag
         expect(res.body[0].tags).toContain("music");
       });
     });
@@ -69,7 +75,6 @@ describe("Bookmarks API", () => {
       let testId: string;
 
       beforeAll(async () => {
-        // Create a temporary bookmark to test updates/deletes
         const res = await request(app)
           .post("/bookmarks")
           .send({ title: "Test", url: "https://test.com" });
@@ -85,11 +90,27 @@ describe("Bookmarks API", () => {
         expect(res.body.title).toBe("Updated Title");
       });
 
+      it("should return 404 when updating a non-existent bookmark", async () => {
+        const res = await request(app)
+          .put("/bookmarks/non-existent-id")
+          .send({ title: "Ghost", url: "https://ghost.com" });
+
+        expect(res.status).toBe(404);
+        expect(res.body).toHaveProperty("error", "Bookmark not found");
+      });
+
+      it("should return 400 when updating with invalid data", async () => {
+        const res = await request(app)
+          .put(`/bookmarks/${testId}`)
+          .send({ title: "", url: "not-a-url" });
+
+        expect(res.status).toBe(400);
+      });
+
       it("should delete a bookmark", async () => {
         const res = await request(app).delete(`/bookmarks/${testId}`);
         expect(res.status).toBe(204);
 
-        // Verify it's really gone
         const check = await request(app).get(`/bookmarks/${testId}`);
         expect(check.status).toBe(404);
       });

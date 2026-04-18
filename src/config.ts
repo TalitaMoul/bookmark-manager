@@ -5,6 +5,7 @@ dotenv.config();
 
 const envSchema = z.object({
   PORT: z.string().transform(Number).default(3000),
+  BOOKMARKS_FILE: z.string().default("./bookmarks.json"),
 });
 
 const _env = envSchema.safeParse(process.env);

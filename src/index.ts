@@ -1,7 +1,7 @@
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
 import { config } from "./config.js";
-import { BookmarkSchema, Bookmark } from "./types.js";
+import { CreateBookmarkSchema, Bookmark } from "./types.js";
 import { saveBookmarks, loadBookmarks } from "./storage.js";
 
 const app = express();
@@ -33,9 +33,9 @@ app.get("/bookmarks/:id", (req, res) => {
 });
 
 app.post("/bookmarks", async (req, res) => {
-  const result = BookmarkSchema.safeParse(req.body);
+  const result = CreateBookmarkSchema.safeParse(req.body);
   if (!result.success) {
-    return res.status(400).json({ errors: result.error.errors });
+    return res.status(400).json({ errors: result.error.issues });
   }
 
   const newBookmark: Bookmark = { ...result.data, id: uuidv4() };
@@ -44,7 +44,6 @@ app.post("/bookmarks", async (req, res) => {
   res.status(201).json(newBookmark);
 });
 
-// PUT - Update an existing bookmark by ID
 app.put("/bookmarks/:id", async (req, res) => {
   const { id } = req.params;
   const index = bookmarks.findIndex((b) => b.id === id);
@@ -53,58 +52,17 @@ app.put("/bookmarks/:id", async (req, res) => {
     return res.status(404).json({ error: "Bookmark not found" });
   }
 
-  // Validate the update data using the same schema
-  const result = BookmarkSchema.safeParse(req.body);
+  const result = CreateBookmarkSchema.safeParse(req.body);
   if (!result.success) {
-    return res.status(400).json({ errors: result.error.errors });
+    return res.status(400).json({ errors: result.error.issues });
   }
 
-  // Keep the original ID, update the rest
   bookmarks[index] = { ...result.data, id };
   await saveBookmarks(bookmarks);
 
   res.json(bookmarks[index]);
 });
 
-// DELETE - Remove a bookmark by ID
-app.delete("/bookmarks/:id", async (req, res) => {
-  const { id } = req.params;
-  const initialLength = bookmarks.length;
-
-  // Filter out the bookmark with the given ID
-  bookmarks = bookmarks.filter((b) => b.id !== id);
-
-  if (bookmarks.length === initialLength) {
-    return res.status(404).json({ error: "Bookmark not found" });
-  }
-
-  await saveBookmarks(bookmarks);
-  res.status(204).send(); // 204 No Content is standard for successful deletion
-});
-
-// PUT - Update an existing bookmark by ID
-app.put("/bookmarks/:id", async (req, res) => {
-  const { id } = req.params;
-  const index = bookmarks.findIndex((b) => b.id === id);
-
-  if (index === -1) {
-    return res.status(404).json({ error: "Bookmark not found" });
-  }
-
-  // Validate the update data
-  const result = BookmarkSchema.safeParse(req.body);
-  if (!result.success) {
-    return res.status(400).json({ errors: result.error.errors });
-  }
-
-  // Update the bookmark while keeping the same ID
-  bookmarks[index] = { ...result.data, id };
-  await saveBookmarks(bookmarks);
-
-  res.json(bookmarks[index]);
-});
-
-// DELETE - Remove a bookmark by ID
 app.delete("/bookmarks/:id", async (req, res) => {
   const { id } = req.params;
   const initialLength = bookmarks.length;
@@ -116,7 +74,7 @@ app.delete("/bookmarks/:id", async (req, res) => {
   }
 
   await saveBookmarks(bookmarks);
-  res.status(204).send(); // Success, no content to return
+  res.status(204).send();
 });
 
 if (process.env.NODE_ENV !== "test") {
