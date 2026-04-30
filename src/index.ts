@@ -72,15 +72,15 @@ app.get("/bookmarks", (req, res) => {
     return res.json(result);
   }
 
-  const pageNum = parseInt(page as string) || 1;
+  const parsedPage = page !== undefined ? parseInt(page as string, 10) : undefined;
+  if (parsedPage !== undefined && (Number.isNaN(parsedPage) || parsedPage < 1)) {
+    return res.status(400).json({ error: "page must be >= 1" });
+  }
+  const pageNum = parsedPage ?? 1;
   const pageSize = Math.min(
     Math.max(parseInt(limit as string) || 10, 1),
     MAX_PAGE_SIZE,
   );
-
-  if (pageNum < 1) {
-    return res.status(400).json({ error: "page must be >= 1" });
-  }
 
   const total = result.length;
   const totalPages = Math.ceil(total / pageSize);
