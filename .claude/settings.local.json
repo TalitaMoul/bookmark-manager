@@ -4,7 +4,19 @@
       "Bash(npm test *)",
       "Bash(npm run *)",
       "Bash(node -e \"const pkg = require\\('./node_modules/ts-node/package.json'\\); console.log\\(pkg.version\\)\")",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm pkg *)",
+      "Bash(powershell *)",
+      "Bash(npm cache *)",
+      "Bash(node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit)",
+      "Bash(node -e \"const e = require\\('./node_modules/express/package.json'\\); console.log\\(e.version\\)\")",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit --amend -m ' *)",
+      "Bash(npx tsc *)",
+      "Bash(gh pr create --title 'feat: add saveUser with Zod validation, UUID generation, and concurrent-write safety' --body ' *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(winget install *)",
+      "Bash(gh pr *)"
     ]
   }
 }

@@ -1,6 +1,7 @@
 {
   "name": "bookmark-manager",
   "version": "1.0.0",
+  "description": "REST API for managing bookmarks with tagging, search, filtering, pagination, and sorting",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "dev": "tsx src/index.ts",

@@ -1,0 +1,21 @@
+== git log --oneline -5 ==
+
+9d335c7 refactor: validate page parameter before applying default in GET /bookmarks
+0baab2b test: add coverage for page query parameter validation
+b69a56f refactor: extract withPersist helper to centralize persist error handling and rollback
+42c7ee1 test: add coverage for persistBookmarks failure in POST, PUT, DELETE
+6121e54 fix: test isolation, type safety, and production hardening
+
+Note: commits 0baab2b (test) and 9d335c7 (refactor) are separate,
+following the practice of committing tests before the implementation fix.
+
+== npm test (after refactoring) ==
+
+> bookmark-manager@1.0.0 test
+> node --experimental-vm-modules node_modules/jest/bin/jest.js
+
+Test Suites: 4 passed, 4 total
+Tests:       67 passed, 67 total
+Snapshots:   0 total
+Time:        3.471 s
+Ran all test suites.

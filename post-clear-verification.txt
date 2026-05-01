@@ -1,0 +1,21 @@
+Post-/clear Verification
+========================
+
+Command: /clear
+Response: (conversation context cleared — no output returned)
+
+---
+
+Question: "What is the command to run the tests in this project?"
+Response: `npm test`
+
+---
+
+Note from Claude:
+This answer was derived from CLAUDE.md, which documents the project commands:
+
+  npm test  # Jest with --experimental-vm-modules (ESM)
+
+CLAUDE.md is loaded as project instructions at the start of every conversation,
+so the information persists across /clear (which only clears conversation history,
+not the project instruction context).
