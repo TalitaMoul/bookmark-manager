@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { saveUser } from "./saveUser.js";
+import { saveUser } from "./services/userService.js";
 
 const TEST_FILE = "./users.service.test.json";
 

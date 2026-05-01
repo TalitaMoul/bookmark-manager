@@ -1,5 +1,6 @@
 import { z } from "zod";
 import fs from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 
 export const CreateUserSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -8,24 +9,31 @@ export const CreateUserSchema = z.object({
 
 export type User = z.infer<typeof CreateUserSchema> & { id: string };
 
-const USERS_FILE = process.env.USERS_FILE ?? "./users.json";
+function getFilePath(): string {
+  return process.env.USERS_FILE ?? "./users.json";
+}
 
 async function loadUsers(): Promise<User[]> {
   try {
-    const data = await fs.readFile(USERS_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return [];
+    const data = await fs.readFile(getFilePath(), "utf-8");
+    return JSON.parse(data) as User[];
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      return [];
+    }
+    throw err;
   }
 }
 
 async function persistUsers(users: User[]): Promise<void> {
-  await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+  await fs.writeFile(getFilePath(), JSON.stringify(users, null, 2));
 }
 
 type SaveUserResult =
   | { success: true; user: User }
   | { success: false; errors: z.ZodIssue[] };
+
+let writeLock = Promise.resolve();
 
 export async function saveUser(input: unknown): Promise<SaveUserResult> {
   const result = CreateUserSchema.safeParse(input);
@@ -33,12 +41,19 @@ export async function saveUser(input: unknown): Promise<SaveUserResult> {
     return { success: false, errors: result.error.issues };
   }
 
-  const { randomUUID } = await import("node:crypto");
   const user: User = { ...result.data, id: randomUUID() };
 
-  const users = await loadUsers();
-  users.push(user);
-  await persistUsers(users);
+  const acquire = writeLock;
+  let release!: () => void;
+  writeLock = new Promise<void>((r) => (release = r));
 
-  return { success: true, user };
+  await acquire;
+  try {
+    const users = await loadUsers();
+    users.push(user);
+    await persistUsers(users);
+    return { success: true, user };
+  } finally {
+    release();
+  }
 }
