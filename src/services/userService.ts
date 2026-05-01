@@ -37,7 +37,7 @@ export async function saveUser(input: unknown): Promise<SaveUserResult> {
   const user: User = { ...result.data, id: randomUUID() };
 
   const users = await loadUsers();
-  const users = [user];
+  users.push(user);
   await persistUsers(users);
 
   return { success: true, user };
