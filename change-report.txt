@@ -1,0 +1,73 @@
+CHANGE REPORT — bookmark-manager
+=================================
+
+## Alteração proposta
+
+Adicionar o campo "description" ao arquivo package.json, que estava com
+valor vazio. O campo descreve o propósito do pacote e é esperado por
+ferramentas npm, linters e plataformas de publicação. Estava presente na
+estrutura JSON mas sem conteúdo — um campo de metadados padrão faltando.
+
+## Arquivo modificado
+
+  package.json
+
+## Diferença (diff) revisada antes de aprovar
+
+Antes de aplicar a mudança, o diff foi inspecionado via `git diff HEAD`:
+
+  --- a/package.json
+  +++ b/package.json
+   {
+     "name": "bookmark-manager",
+     "version": "1.0.0",
+  +  "description": "REST API for managing bookmarks with tagging, search, filtering, pagination, and sorting",
+     "scripts": {
+
+O diff mostra exatamente uma linha adicionada. Nenhum outro campo alterado.
+
+## Como a alteração foi verificada
+
+Dois comandos foram executados após a mudança:
+
+1. Verificação do campo em si:
+
+     npm pkg get description
+     → "REST API for managing bookmarks with tagging, search, filtering,
+        pagination, and sorting"
+
+   Confirma que o valor foi gravado corretamente no JSON.
+
+2. Verificação de regressão:
+
+     npm test
+     → Test Suites: 1 passed, 1 total
+     → Tests:       33 passed, 33 total
+
+   Confirma que a mudança não afetou nenhum comportamento da API.
+
+## Dois controles de sessão utilizados
+
+1. @-mention (referência de arquivo com @)
+   -----------------------------------------------
+   O arquivo @src/index.ts foi referenciado diretamente no prompt para
+   analisar a lógica de filtros do handler GET /bookmarks (linhas 19–80)
+   antes de decidir qual melhoria propor. Em vez de pedir ao Claude para
+   "abrir o arquivo", o @ injeta o conteúdo como contexto imediato da
+   mensagem — útil para direcionar a análise a um arquivo específico sem
+   navegação adicional.
+
+   Exemplo usado: "analisa a lógica de filtros em @src/index.ts"
+
+2. ! prefixo (execução de comando shell direto do chat)
+   -----------------------------------------------
+   O prefixo ! foi usado para rodar comandos de verificação sem sair da
+   conversa com Claude:
+
+     !npm pkg get description
+     !npm test
+
+   O ! executa o comando no shell do projeto e exibe o resultado no chat,
+   permitindo que Claude interprete a saída automaticamente. É diferente
+   de abrir um terminal separado: o resultado fica visível no contexto da
+   sessão e pode ser referenciado na próxima mensagem.
